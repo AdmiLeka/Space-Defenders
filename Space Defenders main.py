@@ -7,13 +7,12 @@ from sys import exit
 game_active = False
 pygame.init()
 clock = pygame.time.Clock()
-ground = pygame.surface.Surface((1300,600))
+ground = pygame.surface.Surface((1300, 600))
 ground.fill('Grey')
-star = pygame.surface.Surface((3,3))
+star = pygame.surface.Surface((3, 3))
 star.fill('White')
-star_location = (random.randint(0,1300), random.randint(0,600))
-star_rect = star.get_rect(midbottom = star_location)
-screen = pygame.display.set_mode((1300,650))
+star_location = (random.randint(0, 1300), random.randint(0, 600))
+screen = pygame.display.set_mode((1300, 650))
 player_gravity = 0
 projectile_speed = 28
 text_end_time = 0
@@ -25,10 +24,11 @@ speed_of_things = 7
 current_time = 0
 contact_time = 0
 in_spaceship = False
-vourasg = False
-admi = False
+uptrend = False
+downtrend = False
 
 #music
+
 #song = pygame.mixer.Sound('music/music.wav')
 #song.set_volume(0.5)
 
@@ -47,16 +47,18 @@ player_surf = pygame.image.load('images/player.png').convert_alpha()
 player_rect = player_surf.get_rect(center = (150,550))
 
 #ryancohen
-ryan_surf = pygame.image.load('images/ryancohen.png').convert_alpha()
-ryan_surf = pygame.transform.scale(ryan_surf, (230,200))
+player2_surf = pygame.image.load('images/player2.png').convert_alpha()
 
 current_player = player_surf
 #projectile
 bomb_surf = pygame.image.load('images/bomb.png').convert_alpha()
 bomb_rect = bomb_surf.get_rect(midbottom = (1500, 800))
-bomb1_surf = pygame.image.load('images/bomb.png').convert_alpha()
-bomb1_rect = bomb_surf.get_rect(midbottom = (1500, 800))
 
+missile1_surf = pygame.image.load('images/missile1.png').convert_alpha()
+missile1_rect = missile1_surf.get_rect(midbottom = (1500, 800))
+
+missile2_surf = pygame.image.load('images/missile2.png').convert_alpha()
+missile2_rect = missile2_surf.get_rect(midbottom = (1500, 800))
 
 #elimination
 points_text = pygame.font.Font('font/Pixeltype.ttf', 40)
@@ -71,15 +73,19 @@ monster2_rect = monster2_surf.get_rect(midright = (800,500))
 monster3_surf = pygame.image.load('images/monster3.png').convert_alpha()
 monster3_rect = monster3_surf.get_rect(midright = (1100,200))
 
+#enemies list
+
+enemies = [monster1_rect, monster2_rect, monster3_rect]
+
 #avoid
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
 points = 0
-gme_text = pygame.font.Font('font/Pixeltype.ttf',100)
+text_change = pygame.font.Font('font/Pixeltype.ttf', 100)
 
-drs_surf = pygame.image.load('images/drs.png').convert_alpha()
-drs_rect = drs_surf.get_rect(midright = (1350,300))
+blast_surf = pygame.image.load('images/blast.png').convert_alpha()
+blast_rect = blast_surf.get_rect(midright = (1350, 300))
 
 
 rocket_surf = pygame.image.load('images/rocket.png').convert_alpha()
@@ -95,28 +101,28 @@ obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1700)
 #lambo_spawn_timer =
 while True:
-    if vourasg == True:
+    if uptrend == True:
         player_rect.y -= 10
-    if admi == True:
+    if downtrend == True:
         player_rect.y += 10
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if vourasg == True:
+        if uptrend == True:
             player_rect.y -= 10
-        if admi == True:
+        if downtrend == True:
             player_rect.y += 10
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and in_spaceship:
             player_rect.y -= 10
-            vourasg = True
+            uptrend = True
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN and in_spaceship:
             player_rect.y += 10
-            admi = True
+            downtrend = True
         elif event.type == pygame.KEYUP and event.key == pygame.K_UP and in_spaceship:
-            vourasg = False
+            uptrend = False
         elif event.type == pygame.KEYUP and event.key == pygame.K_DOWN and in_spaceship:
-            admi = False
+            downtrend = False
 
 
         if event.type == pygame.KEYDOWN:
@@ -126,25 +132,24 @@ while True:
             if event.key == pygame.K_SPACE:
                 player_gravity = -20
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a and bomb_rect.x >=1350 and not in_spaceship:
+            if event.key == pygame.K_a and bomb_rect.x >= 1350 and not in_spaceship:
                 if points < 100000:
                     bomb_rect.x = player_rect.x + 100
                     bomb_rect.y = player_rect.y + 50
-                elif points >= 100000 and drs_rect.x >= 1350:
-                    drs_rect.x = player_rect.x + 100
-                    drs_rect.y = player_rect.y + 50
-            elif event.key == pygame.K_a and bomb_rect.x >=1350 and in_spaceship and bomb_rect.x >= 1350 and bomb1_rect.x >= 1350:
-                bomb_rect.x = player_rect.x + 100
-                bomb1_rect.x = player_rect.x + 100
-                bomb_rect.y = player_rect.y + 50
-                bomb1_rect.y = player_rect.y + 155
+                elif points >= 100000 and blast_rect.x >= 1350:
+                    blast_rect.x = player_rect.x + 100
+                    blast_rect.y = player_rect.y + 50
+            elif event.key == pygame.K_a and bomb_rect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
+                missile1_rect.x = player_rect.x + 100
+                missile2_rect.x = player_rect.x + 100
+                missile1_rect.y = player_rect.y + 35
+                missile2_rect.y = player_rect.y + 155
 
     if game_active:
-        #song.play()
-        if points < 300000 and not in_spaceship:
+        if points < 100000 and not in_spaceship:
             current_player = player_surf
-        elif points > 300000 and not in_spaceship:
-            current_player = ryan_surf
+        elif points > 100000 and not in_spaceship:
+            current_player = player2_surf
         elif in_spaceship:
             current_player = spaceshipdrive_surf
 
@@ -163,7 +168,6 @@ while True:
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
 
-        #print(points)
         #jump
         if not in_spaceship:
             player_rect.y += player_gravity
@@ -172,59 +176,94 @@ while True:
 
 
         #shooting collision(bomb)
-        if points < 100000:
-            if bomb_rect.colliderect(monster1_rect) or bomb1_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect) and in_spaceship:
+        if points < 100000 and not in_spaceship:
+            if bomb_rect.colliderect(monster1_rect):
                 monster1_rect.x = 1350
                 monster1_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
-                points_rect = points_text.render('+ 100$', None, 'Green')
+                points_rect = points_text.render('+ 100', None, 'Green')
                 bomb_rect.x = 1500
                 screen.blit(points_rect, bomb_rect)
-            elif bomb_rect.colliderect(monster2_rect) or bomb1_rect.colliderect(monster2_rect) or spaceshipdrive_rect.colliderect(monster2_rect) and in_spaceship:
+            elif bomb_rect.colliderect(monster2_rect):
                 monster2_rect.x = 1350
                 monster2_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
                 bomb_rect.x = 1500
-            elif bomb_rect.colliderect(monster3_rect) or bomb1_rect.colliderect(monster3_rect) or spaceshipdrive_rect.colliderect(monster3_rect) and in_spaceship:
+            elif bomb_rect.colliderect(monster3_rect):
                 monster3_rect.x = 1350
                 monster3_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
                 bomb_rect.x = 1500
-        #shooting collision (drs)
+        #shooting collision (blast)
         elif points > 100000:
-            if drs_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect) and in_spaceship:
+            if blast_rect.colliderect(monster1_rect):
                 monster1_rect.x = 1350
                 monster1_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
-                points_rect = points_text.render('+ 100$', None, 'Green')
+                points_rect = points_text.render('+ 100', None, 'Green')
                 screen.blit(points_rect, bomb_rect)
-            elif drs_rect.colliderect(monster2_rect) or spaceshipdrive_rect.colliderect(monster2_rect) and in_spaceship:
+            elif blast_rect.colliderect(monster2_rect):
                 monster2_rect.x = 1350
                 monster2_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
-            elif drs_rect.colliderect(monster3_rect) or spaceshipdrive_rect.colliderect(monster3_rect) and in_spaceship:
+            elif blast_rect.colliderect(monster3_rect):
                 monster3_rect.x = 1350
                 monster3_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
+        elif in_spaceship:
+            if (missile1_rect.colliderect(monster1_rect) or missile2_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect)):
+                monster1_rect.x = 1350
+                monster1_rect.y = random.randint(0, 500)
+                text_color = 'Green'
+                points += 100
+                points_rect = points_text.render('+ 100', None, 'Green')
+                if missile1_rect.colliderect(monster1_rect):
+                    missile1_rect.x = 1500
+                elif missile2_rect.colliderect(monster1_rect):
+                    missile2_rect.x = 1500
+            elif (missile1_rect.colliderect(monster2_rect) or missile2_rect.colliderect(monster2_rect) or spaceshipdrive_rect.colliderect(monster2_rect)):
+                monster2_rect.x = 1350
+                monster2_rect.y = random.randint(0, 500)
+                text_color = 'Green'
+                points += 100
+                points_rect = points_text.render('+ 100', None, 'Green')
+                if missile1_rect.colliderect(monster2_rect):
+                    missile1_rect.x = 1500
+                elif missile2_rect.colliderect(monster2_rect):
+                    missile2_rect.x = 1500
+            elif (missile1_rect.colliderect(monster3_rect) or missile2_rect.colliderect(monster3_rect) or spaceshipdrive_rect.colliderect(monster3_rect)):
+                monster3_rect.x = 1350
+                monster3_rect.y = random.randint(0, 500)
+                text_color = 'Green'
+                points += 100
+                points_rect = points_text.render('+ 100', None, 'Green')
+                if missile1_rect.colliderect(monster3_rect):
+                    missile1_rect.x = 1500
+                elif missile2_rect.colliderect(monster3_rect):
+                    missile2_rect.x = 1500
+
+
+
         #poison collision
         if player_rect.colliderect(poison_rect) and not in_spaceship:
             poison_rect.x = 1500
             poison_rect.y = random.randint(0, 500)
             text_color = 'Red'
             points -= 1000
-            gme_surf = gme_text.render(f'Points: {points}', None, text_color)
+            textChange_surf = text_change.render(f'Points: {points}', None, text_color)
         elif player_rect.colliderect(poison_rect) and in_spaceship:
             points += 1000
             poison_rect.x = 1500
             poison_rect.y = random.randint(0, 500)
 
-        #eliminate, respawn mech
+        #elimination, respawn mechanism
+
         screen.blit(monster1_surf, monster1_rect)
         monster1_rect.x -= speed_of_things
         if monster1_rect.x <= -100:
@@ -240,17 +279,20 @@ while True:
         if monster3_rect.x <= -100:
             monster3_rect.x = 1500
             monster3_rect.y = random.randint(0,500)
+
         #shooting
 
         screen.blit(bomb_surf, bomb_rect)
         bomb_rect.x += projectile_speed
-        screen.blit(bomb1_surf, bomb1_rect)
-        bomb1_rect.x += projectile_speed
+        screen.blit(missile1_surf, missile1_rect)
+        missile1_rect.x += projectile_speed
+        screen.blit(missile2_surf, missile2_rect)
+        missile2_rect.x += projectile_speed
+        screen.blit(blast_surf, blast_rect)
+        blast_rect.x += projectile_speed
 
-
-        screen.blit(drs_surf,drs_rect)
-        drs_rect.x += projectile_speed
         #avoid
+
         rotated = pygame.transform.rotate(poison_surf, spin_speed)
         screen.blit(rotated, poison_rect)
         poison_rect.x -= speed_of_things
@@ -264,11 +306,11 @@ while True:
         rocket_rect.x -= speed_of_things
         if rocket_rect.x <= -100:
             rocket_rect.x = 1350
-            rocket_rect.y = random.randint(0,500)
+            rocket_rect.y = random.randint(0, 500)
         #gmeticker
 
-        gme_surf = gme_text.render(f'Points: {points}', None, text_color)
-        screen.blit(gme_surf,(850,40))
+        textChange_surf = text_change.render(f'Points: {points}', None, text_color)
+        screen.blit(textChange_surf, (850, 40))
 
         # Spaceship SPAWN
         screen.blit(spaceshipcollect_surf, spaceshipcollect_rect)
