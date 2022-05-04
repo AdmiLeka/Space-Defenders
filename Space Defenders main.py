@@ -4,15 +4,18 @@ import time
 import pygame
 import random
 from sys import exit
+from stars import Star
+from background import BG
+
 game_active = False
 pygame.init()
 clock = pygame.time.Clock()
 ground = pygame.surface.Surface((1300, 600))
 ground.fill('Grey')
-star = pygame.surface.Surface((3, 3))
-star.fill('White')
-star_location = (random.randint(0, 1300), random.randint(0, 600))
-screen = pygame.display.set_mode((1300, 650))
+DISPLAY_WIDTH = 1300
+DISPLAY_HEIGHT = 650
+DISPLAY_SIZE = (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+screen = pygame.display.set_mode(DISPLAY_SIZE)
 player_gravity = 0
 projectile_speed = 28
 text_end_time = 0
@@ -20,7 +23,7 @@ spin_speed = 0
 text_rect = None
 text_color = 'White'
 caption = pygame.display.set_caption('Space Defenders')
-speed_of_things = 7
+speed_of_things = 5
 current_time = 0
 contact_time = 0
 in_spaceship = False
@@ -42,11 +45,17 @@ ss_rect4 = ss_text.render('Eliminate: ', None, 'White')
 ss_rect5 = ss_text.render('Stay near/Collect: ', None, 'White')
 ss_rect6 = ss_text.render('Avoid: ', None, 'White')
 
+#Star background
+bg = BG()
+bg_group = pygame.sprite.Group()
+bg_group.add(bg)
+
+
 #player
 player_surf = pygame.image.load('images/player.png').convert_alpha()
 player_rect = player_surf.get_rect(center = (150,550))
 
-#ryancohen
+#player2
 player2_surf = pygame.image.load('images/player2.png').convert_alpha()
 
 current_player = player_surf
@@ -73,7 +82,7 @@ monster2_rect = monster2_surf.get_rect(midright = (800,500))
 monster3_surf = pygame.image.load('images/monster3.png').convert_alpha()
 monster3_rect = monster3_surf.get_rect(midright = (1100,200))
 
-#enemies list
+#Enemies list
 
 enemies = [monster1_rect, monster2_rect, monster3_rect]
 
@@ -97,9 +106,6 @@ spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
 spaceshipdrive_rect = player_rect
 
-obstacle_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(obstacle_timer, 1700)
-#lambo_spawn_timer =
 while True:
     if uptrend == True:
         player_rect.y -= 10
@@ -124,13 +130,12 @@ while True:
         elif event.type == pygame.KEYUP and event.key == pygame.K_DOWN and in_spaceship:
             downtrend = False
 
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 game_active = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player_gravity = -20
+            if event.key == pygame.K_SPACE and player_rect.y == 450 and not in_spaceship:
+                player_gravity = -30
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a and bomb_rect.x >= 1350 and not in_spaceship:
                 if points < 100000:
@@ -153,12 +158,17 @@ while True:
         elif in_spaceship:
             current_player = spaceshipdrive_surf
 
+        #bg_group.update()
         current_time = pygame.time.get_ticks()
+
         screen.fill('Black')
+        #bg_group.draw(screen)
         screen.blit(ground, (0, 600))
         #gravity
         player_gravity += 1
+
         #RocketColision
+
         screen.blit(current_player, player_rect)
         if player_rect.colliderect(rocket_rect) and not in_spaceship:
             text_color = 'Green'
@@ -168,14 +178,16 @@ while True:
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
 
-        #jump
+        #Setting a point in the y axis that player can't go below
+
         if not in_spaceship:
             player_rect.y += player_gravity
-        if player_rect.y >= 450 and not in_spaceship:
+        if player_rect.y > 450 and not in_spaceship:
             player_rect.y = 450
 
 
         #shooting collision(bomb)
+
         if points < 100000 and not in_spaceship:
             if bomb_rect.colliderect(monster1_rect):
                 monster1_rect.x = 1350
@@ -198,13 +210,16 @@ while True:
                 points += 100
                 bomb_rect.x = 1500
         #shooting collision (blast)
-        elif points > 100000:
+        elif points > 100000 and not in_spaceship:
             if blast_rect.colliderect(monster1_rect):
                 monster1_rect.x = 1350
                 monster1_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
-                points_rect = points_text.render('+ 100', None, 'Green')
+                timew = pygame.time.get_ticks()
+                curr_time = timew
+                if timew <= curr_time + 1000:
+                    text_color = 'Green'
+                    points += 100
+                    points_rect = points_text.render('+ 100', None, 'Green')
                 screen.blit(points_rect, bomb_rect)
             elif blast_rect.colliderect(monster2_rect):
                 monster2_rect.x = 1350
@@ -216,6 +231,7 @@ while True:
                 monster3_rect.y = random.randint(0, 500)
                 text_color = 'Green'
                 points += 100
+        #shooting collision while in spaceship (missiles)
         elif in_spaceship:
             if (missile1_rect.colliderect(monster1_rect) or missile2_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect)):
                 monster1_rect.x = 1350
@@ -270,7 +286,7 @@ while True:
             monster1_rect.x = 1350
             monster1_rect.y = random.randint(0, 500)
         screen.blit(monster2_surf, monster2_rect)
-        monster2_rect.x  -= speed_of_things
+        monster2_rect.x -= speed_of_things
         if monster2_rect.x <= -100:
             monster2_rect.x = 1350
             monster2_rect.y = random.randint(0,500)
@@ -278,7 +294,7 @@ while True:
         monster3_rect.x -= speed_of_things
         if monster3_rect.x <= -100:
             monster3_rect.x = 1500
-            monster3_rect.y = random.randint(0,500)
+            monster3_rect.y = random.randint(0, 500)
 
         #shooting
 
@@ -291,7 +307,7 @@ while True:
         screen.blit(blast_surf, blast_rect)
         blast_rect.x += projectile_speed
 
-        #avoid
+        #Rotation and movement mechanism for poison object
 
         rotated = pygame.transform.rotate(poison_surf, spin_speed)
         screen.blit(rotated, poison_rect)
@@ -300,48 +316,51 @@ while True:
         if poison_rect.x <= -100:
             poison_rect.x = 1350
 
-        #collect
+        #Spawn mechanism of the rocket object
 
         screen.blit(rocket_surf, rocket_rect)
         rocket_rect.x -= speed_of_things
         if rocket_rect.x <= -100:
             rocket_rect.x = 1350
             rocket_rect.y = random.randint(0, 500)
-        #gmeticker
 
         textChange_surf = text_change.render(f'Points: {points}', None, text_color)
         screen.blit(textChange_surf, (850, 40))
 
-        # Spaceship SPAWN
+        # Spaceship spawn mechanism
         screen.blit(spaceshipcollect_surf, spaceshipcollect_rect)
         spaceshipcollect_rect.x -= 30
         if spaceshipcollect_rect.x <= -100:
             spaceshipcollect_rect.x = random.randint(18000, 27000)
             spaceshipcollect_rect.y = random.randint(100, 550)
-        #Spaceship COLLISION
+
+        #Spaceship object collision with player object
+
         if player_rect.colliderect(spaceshipcollect_rect):
             in_spaceship = True
             current_time = pygame.time.get_ticks()
             contact_time = current_time
-            speed_of_things = 25
+            speed_of_things = 19
             points += 1000
         if current_time >= contact_time + 5000:
             speed_of_things = 7
             in_spaceship = False
+            uptrend = False
+            downtrend = False
     else:
         screen.fill('Black')
         screen.blit(ss_rect, (50,50))
-        screen.blit(ss_rect2,(50,110))
-        screen.blit(ss_rect3, (50,170))
+        screen.blit(ss_rect2, (50, 110))
+        screen.blit(ss_rect3, (50, 170))
         screen.blit(ss_rect5, (50, 280))
         screen.blit(pygame.transform.scale(spaceshipcollect_surf, (170, 100)), (640, 250))
         screen.blit(rocket_surf, (800, 230))
-        screen.blit(ss_rect6, (50,420))
+        screen.blit(ss_rect6, (50, 420))
         screen.blit(poison_surf, (250, 360))
-        screen.blit(ss_rect4, (50,570))
-        screen.blit(pygame.transform.scale(monster1_surf, (100,100)), (400,540))
-        screen.blit(pygame.transform.scale(monster2_surf, (100,100)), (550, 540))
-        screen.blit(pygame.transform.scale(monster3_surf, (100,100)), (700, 540))
+        screen.blit(ss_rect4, (50, 570))
+        screen.blit(pygame.transform.scale(monster1_surf, (100, 100)), (400, 540))
+        screen.blit(pygame.transform.scale(monster2_surf, (100, 100)), (550, 540))
+        screen.blit(pygame.transform.scale(monster3_surf, (100, 100)), (700, 540))
 
     pygame.display.update()
     clock.tick(60)
