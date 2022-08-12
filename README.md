@@ -16,6 +16,6 @@ and access to the ship's rockets.
 
 
 Reaching 200,000 points and higher transforms your soldier into a super soldier with a super weapon that
-passes through the enemies and destroys everything in it's path!
+passes through the enemies and destroys everything in its path!
 
 ![Space Defenders image4](https://user-images.githubusercontent.com/95366089/184306049-0fb894e6-3c9a-4ba6-a7c2-67ff2e13556d.png)
