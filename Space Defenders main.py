@@ -32,8 +32,8 @@ downtrend = False
 
 #music
 
-#song = pygame.mixer.Sound('music/music.wav')
-#song.set_volume(0.5)
+song = pygame.mixer.Sound('music/music.wav')
+song.set_volume(0.5)
 
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -106,6 +106,26 @@ spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
 spaceshipdrive_rect = player_rect
 
+
+#Respawning mechanism for collidable/destroyable elements
+def respawnElement(enemy):
+    enemy.x = 1350
+    enemy.y = random.randint(0, 500)
+
+#Managing the score
+def addToPoints():
+    global points
+    points += 100
+
+def updateTextColor():
+    global text_color, points
+    if points > 0:
+        text_color = "Green"
+    elif points < 0:
+        text_color = "Red"
+    else:
+        text_color = "White"
+
 while True:
     if uptrend == True:
         player_rect.y -= 10
@@ -151,6 +171,7 @@ while True:
                 missile2_rect.y = player_rect.y + 155
 
     if game_active:
+        updateTextColor()
         if points < 100000 and not in_spaceship:
             current_player = player_surf
         elif points > 100000 and not in_spaceship:
@@ -171,8 +192,7 @@ while True:
 
         screen.blit(current_player, player_rect)
         if player_rect.colliderect(rocket_rect) and not in_spaceship:
-            text_color = 'Green'
-            points = points + 500
+            points += 50
         elif player_rect.colliderect(rocket_rect) and in_spaceship:
             points = points + 1000
             rocket_rect.x = random.randint(1400,1600)
@@ -190,111 +210,76 @@ while True:
 
         if points < 100000 and not in_spaceship:
             if bomb_rect.colliderect(monster1_rect):
-                monster1_rect.x = 1350
-                monster1_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
-                points_rect = points_text.render('+ 100', None, 'Green')
+                respawnElement(monster1_rect)
+                addToPoints()
                 bomb_rect.x = 1500
-                screen.blit(points_rect, bomb_rect)
             elif bomb_rect.colliderect(monster2_rect):
-                monster2_rect.x = 1350
-                monster2_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
+                respawnElement(monster2_rect)
+                addToPoints()
                 bomb_rect.x = 1500
             elif bomb_rect.colliderect(monster3_rect):
-                monster3_rect.x = 1350
-                monster3_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
+                respawnElement(monster3_rect)
+                addToPoints()
                 bomb_rect.x = 1500
         #shooting collision (blast)
         elif points > 100000 and not in_spaceship:
             if blast_rect.colliderect(monster1_rect):
-                monster1_rect.x = 1350
-                monster1_rect.y = random.randint(0, 500)
-                timew = pygame.time.get_ticks()
-                curr_time = timew
-                if timew <= curr_time + 1000:
-                    text_color = 'Green'
-                    points += 100
-                    points_rect = points_text.render('+ 100', None, 'Green')
-                screen.blit(points_rect, bomb_rect)
+                respawnElement(monster1_rect)
+                addToPoints()
             elif blast_rect.colliderect(monster2_rect):
-                monster2_rect.x = 1350
-                monster2_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
+                respawnElement(monster2_rect)
+                addToPoints()
             elif blast_rect.colliderect(monster3_rect):
-                monster3_rect.x = 1350
-                monster3_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
+                respawnElement(monster3_rect)
+                addToPoints()
         #shooting collision while in spaceship (missiles)
         elif in_spaceship:
             if (missile1_rect.colliderect(monster1_rect) or missile2_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect)):
-                monster1_rect.x = 1350
-                monster1_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
-                points_rect = points_text.render('+ 100', None, 'Green')
+                respawnElement(monster1_rect)
+                addToPoints()
                 if missile1_rect.colliderect(monster1_rect):
                     missile1_rect.x = 1500
                 elif missile2_rect.colliderect(monster1_rect):
                     missile2_rect.x = 1500
             elif (missile1_rect.colliderect(monster2_rect) or missile2_rect.colliderect(monster2_rect) or spaceshipdrive_rect.colliderect(monster2_rect)):
-                monster2_rect.x = 1350
-                monster2_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
-                points_rect = points_text.render('+ 100', None, 'Green')
+                respawnElement(monster2_rect)
+                addToPoints()
                 if missile1_rect.colliderect(monster2_rect):
                     missile1_rect.x = 1500
                 elif missile2_rect.colliderect(monster2_rect):
                     missile2_rect.x = 1500
             elif (missile1_rect.colliderect(monster3_rect) or missile2_rect.colliderect(monster3_rect) or spaceshipdrive_rect.colliderect(monster3_rect)):
-                monster3_rect.x = 1350
-                monster3_rect.y = random.randint(0, 500)
-                text_color = 'Green'
-                points += 100
-                points_rect = points_text.render('+ 100', None, 'Green')
+                respawnElement(monster3_rect)
+                addToPoints()
                 if missile1_rect.colliderect(monster3_rect):
                     missile1_rect.x = 1500
                 elif missile2_rect.colliderect(monster3_rect):
                     missile2_rect.x = 1500
 
-
-
         #poison collision
         if player_rect.colliderect(poison_rect) and not in_spaceship:
-            poison_rect.x = 1500
-            poison_rect.y = random.randint(0, 500)
+            respawnElement(poison_rect)
             text_color = 'Red'
             points -= 1000
             textChange_surf = text_change.render(f'Points: {points}', None, text_color)
         elif player_rect.colliderect(poison_rect) and in_spaceship:
             points += 1000
-            poison_rect.x = 1500
-            poison_rect.y = random.randint(0, 500)
+            respawnElement(poison_rect)
 
         #elimination, respawn mechanism
 
         screen.blit(monster1_surf, monster1_rect)
         monster1_rect.x -= speed_of_things
         if monster1_rect.x <= -100:
-            monster1_rect.x = 1350
-            monster1_rect.y = random.randint(0, 500)
+            respawnElement(monster1_rect)
         screen.blit(monster2_surf, monster2_rect)
         monster2_rect.x -= speed_of_things
         if monster2_rect.x <= -100:
-            monster2_rect.x = 1350
-            monster2_rect.y = random.randint(0,500)
+            respawnElement(monster2_rect)
         screen.blit(monster3_surf, monster3_rect)
         monster3_rect.x -= speed_of_things
         if monster3_rect.x <= -100:
-            monster3_rect.x = 1500
-            monster3_rect.y = random.randint(0, 500)
+            respawnElement(monster3_rect)
 
         #shooting
 
@@ -321,8 +306,7 @@ while True:
         screen.blit(rocket_surf, rocket_rect)
         rocket_rect.x -= speed_of_things
         if rocket_rect.x <= -100:
-            rocket_rect.x = 1350
-            rocket_rect.y = random.randint(0, 500)
+            respawnElement(rocket_rect)
 
         textChange_surf = text_change.render(f'Points: {points}', None, text_color)
         screen.blit(textChange_surf, (850, 40))
@@ -364,5 +348,3 @@ while True:
 
     pygame.display.update()
     clock.tick(60)
-
-
