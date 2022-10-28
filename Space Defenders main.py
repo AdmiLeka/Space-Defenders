@@ -57,8 +57,12 @@ player_rect = player_surf.get_rect(center = (150,550))
 
 #player2
 player2_surf = pygame.image.load('images/player2.png').convert_alpha()
-
 current_player = player_surf
+
+#heart
+heart_surf = pygame.image.load('images/heart.png').convert_alpha()
+heart_rect = heart_surf.get_rect(center = (150, 550))
+lives = 5
 #projectile
 bomb_surf = pygame.image.load('images/bomb.png').convert_alpha()
 bomb_rect = bomb_surf.get_rect(midbottom = (1500, 800))
@@ -126,6 +130,31 @@ def updateTextColor():
     else:
         text_color = "White"
 
+def hasCollided(enemyRect):
+    global missile1_rect, missile2_rect, spaceshipdrive_rect
+    if (missile1_rect.colliderect(enemyRect) or missile2_rect.colliderect(enemyRect) or spaceshipdrive_rect.colliderect(enemyRect)):
+        return True
+
+def respawnAfterCollision(enemyRect):
+    global missile1_rect, missile2_rect
+    respawnElement(enemyRect)
+    addToPoints()
+    if missile1_rect.colliderect(enemyRect):
+        missile1_rect.x = 1500
+    elif missile2_rect.colliderect(enemyRect):
+        missile2_rect.x = 1500
+
+def showHearts():
+    global lives
+    x = 40
+    y = 40
+    increment = 50
+    for i in range(0,lives):
+        screen.blit(heart_surf, (x, y))
+        x+=increment
+
+
+
 while True:
     if uptrend == True:
         player_rect.y -= 10
@@ -185,6 +214,8 @@ while True:
         screen.fill('Black')
         #bg_group.draw(screen)
         screen.blit(ground, (0, 600))
+        showHearts()
+        #screen.blit(heart_surf, (90, 40))
         #gravity
         player_gravity += 1
 
@@ -232,35 +263,22 @@ while True:
             elif blast_rect.colliderect(monster3_rect):
                 respawnElement(monster3_rect)
                 addToPoints()
-        #shooting collision while in spaceship (missiles)
+
+        #Collision mechanics with rocketship and rocketship's missles and respawn
         elif in_spaceship:
-            if (missile1_rect.colliderect(monster1_rect) or missile2_rect.colliderect(monster1_rect) or spaceshipdrive_rect.colliderect(monster1_rect)):
-                respawnElement(monster1_rect)
-                addToPoints()
-                if missile1_rect.colliderect(monster1_rect):
-                    missile1_rect.x = 1500
-                elif missile2_rect.colliderect(monster1_rect):
-                    missile2_rect.x = 1500
-            elif (missile1_rect.colliderect(monster2_rect) or missile2_rect.colliderect(monster2_rect) or spaceshipdrive_rect.colliderect(monster2_rect)):
-                respawnElement(monster2_rect)
-                addToPoints()
-                if missile1_rect.colliderect(monster2_rect):
-                    missile1_rect.x = 1500
-                elif missile2_rect.colliderect(monster2_rect):
-                    missile2_rect.x = 1500
-            elif (missile1_rect.colliderect(monster3_rect) or missile2_rect.colliderect(monster3_rect) or spaceshipdrive_rect.colliderect(monster3_rect)):
-                respawnElement(monster3_rect)
-                addToPoints()
-                if missile1_rect.colliderect(monster3_rect):
-                    missile1_rect.x = 1500
-                elif missile2_rect.colliderect(monster3_rect):
-                    missile2_rect.x = 1500
+            if hasCollided(monster1_rect):
+                respawnAfterCollision(monster1_rect)
+            elif hasCollided(monster2_rect):
+                respawnAfterCollision(monster2_rect)
+            elif hasCollided(monster3_rect):
+                respawnAfterCollision(monster3_rect)
 
         #poison collision
         if player_rect.colliderect(poison_rect) and not in_spaceship:
             respawnElement(poison_rect)
             text_color = 'Red'
             points -= 1000
+            lives -= 1
             textChange_surf = text_change.render(f'Points: {points}', None, text_color)
         elif player_rect.colliderect(poison_rect) and in_spaceship:
             points += 1000
