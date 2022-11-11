@@ -1,6 +1,5 @@
 #Space Defenders
 import time
-
 import pygame
 import random
 from sys import exit
@@ -68,8 +67,9 @@ class Player(pygame.sprite.Sprite):
         self.applyGravity()
         self.playerControls()
 
-#Instance of player and addition to the group
+#Creation of player object
 player = Player()
+
 
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -118,7 +118,7 @@ enemies = [monster1_rect, monster2_rect, monster3_rect]
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
-points = 98000
+points = 0
 text_change = pygame.font.Font('font/Pixeltype.ttf', 100)
 
 blast_surf = pygame.image.load('images/blast.png').convert_alpha()
@@ -134,6 +134,8 @@ spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
 spaceshipdrive_rect = player.rect
 
+#Music
+bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.mp3")
 
 #Respawning mechanism for collidable/destroyable elements
 def respawnElement(enemy):
