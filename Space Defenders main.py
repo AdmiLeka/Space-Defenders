@@ -14,7 +14,6 @@ DISPLAY_WIDTH = 1300
 DISPLAY_HEIGHT = 650
 DISPLAY_SIZE = (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 screen = pygame.display.set_mode(DISPLAY_SIZE)
-player_gravity = 0
 projectile_speed = 28
 text_end_time = 0
 spin_speed = 0
@@ -35,28 +34,42 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         player1 = pygame.image.load('images/player.png').convert_alpha()
         player2 = pygame.image.load('images/player2.png').convert_alpha()
-        self.playerImage = [player1, player2]
-        self.currentPlayer = 0
-        self.image = self.playerImage[current_player]
+        spaceShip = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
+        self.playerImage = [player1, player2, spaceShip]
+        self.image = self.playerImage[0]
         self.rect = self.image.get_rect(center = (150,550))
         self.gravity = 0
 
+    #Icon change when points > 100k
     def decidePlayerSprite(self):
-        if points > 100000:
-            self.currentPlayer = 1
+        if not in_spaceship:
+            if points > 100000:
+                self.image = self.playerImage[1]
+        else:
+            self.image = self.playerImage[2]
 
+    #Gravity mechanism
     def applyGravity(self):
         self.gravity += 1
+        if not in_spaceship:
+            self.rect.y += self.gravity
+        if player.rect.y > 450 and not in_spaceship:
+            player.rect.y = 450
 
+    #Jump and shoot mechanic
     def playerControls(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and self.rect.y == 450:
+        if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
             self.gravity = -30
 
+    #Calling all the above functions
     def update(self):
         self.decidePlayerSprite()
         self.applyGravity()
         self.playerControls()
+
+#Instance of player and addition to the group
+player = Player()
 
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -67,15 +80,6 @@ ss_rect3 = instr_text.render('Press P to start playing, A to shoot and SPACE to 
 ss_rect4 = ss_text.render('Eliminate: ', None, 'White')
 ss_rect5 = ss_text.render('Stay near/Collect: ', None, 'White')
 ss_rect6 = ss_text.render('Avoid: ', None, 'White')
-
-
-#player
-player_surf = pygame.image.load('images/player.png').convert_alpha()
-player_rect = player_surf.get_rect(center = (150,550))
-
-#player2
-player2_surf = pygame.image.load('images/player2.png').convert_alpha()
-current_player = player_surf
 
 #heart
 heart_surf = pygame.image.load('images/heart.png').convert_alpha()
@@ -114,7 +118,7 @@ enemies = [monster1_rect, monster2_rect, monster3_rect]
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
-points = 0
+points = 98000
 text_change = pygame.font.Font('font/Pixeltype.ttf', 100)
 
 blast_surf = pygame.image.load('images/blast.png').convert_alpha()
@@ -128,7 +132,7 @@ spaceshipcollect_surf = pygame.image.load('images/spaceshipcollect.png').convert
 spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 
 spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
-spaceshipdrive_rect = player_rect
+spaceshipdrive_rect = player.rect
 
 
 #Respawning mechanism for collidable/destroyable elements
@@ -176,7 +180,7 @@ def collectHearts():
     global lives
     if collectible_heart_rect.x <= -100:
         collectible_heart_rect.x = 5000
-    if player_rect.colliderect(collectible_heart_rect) and lives < 5:
+    if player.rect.colliderect(collectible_heart_rect) and lives < 5:
         lives += 1
 
     collectible_heart_rect.x -= speed_of_things
@@ -188,22 +192,22 @@ def dotheHearts():
 
 while True:
     if uptrend == True:
-        player_rect.y -= 10
+        player.rect.y -= 10
     if downtrend == True:
-        player_rect.y += 10
+        player.rect.y += 10
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
         if uptrend == True:
-            player_rect.y -= 10
+            player.rect.y -= 10
         if downtrend == True:
-            player_rect.y += 10
+            player.rect.y += 10
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and in_spaceship:
-            player_rect.y -= 10
+            player.rect.y -= 10
             uptrend = True
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN and in_spaceship:
-            player_rect.y += 10
+            player.rect.y += 10
             downtrend = True
         elif event.type == pygame.KEYUP and event.key == pygame.K_UP and in_spaceship:
             uptrend = False
@@ -214,31 +218,22 @@ while True:
             if event.key == pygame.K_p:
                 game_active = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and player_rect.y == 450 and not in_spaceship:
-                player_gravity = -30
-        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a and bomb_rect.x >= 1350 and not in_spaceship:
                 if points < 100000:
-                    bomb_rect.x = player_rect.x + 100
-                    bomb_rect.y = player_rect.y + 50
+                    bomb_rect.x = player.rect.x + 100
+                    bomb_rect.y = player.rect.y + 50
                 elif points >= 100000 and blast_rect.x >= 1350:
-                    blast_rect.x = player_rect.x + 100
-                    blast_rect.y = player_rect.y + 50
+                    blast_rect.x = player.rect.x + 100
+                    blast_rect.y = player.rect.y + 50
             elif event.key == pygame.K_a and bomb_rect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
-                missile1_rect.x = player_rect.x + 100
-                missile2_rect.x = player_rect.x + 100
-                missile1_rect.y = player_rect.y + 35
-                missile2_rect.y = player_rect.y + 155
+                missile1_rect.x = player.rect.x + 100
+                missile2_rect.x = player.rect.x + 100
+                missile1_rect.y = player.rect.y + 35
+                missile2_rect.y = player.rect.y + 155
 
     if game_active:
         updateTextColor()
-        if points < 100000 and not in_spaceship:
-            current_player = player_surf
-        elif points > 100000 and not in_spaceship:
-            current_player = player2_surf
-        elif in_spaceship:
-            current_player = spaceshipdrive_surf
-
+        player.update()
         #bg_group.update()
         current_time = pygame.time.get_ticks()
 
@@ -246,25 +241,19 @@ while True:
         #bg_group.draw(screen)
         screen.blit(ground, (0, 600))
 
-        #gravity
-        player_gravity += 1
-
         #RocketColision
 
-        screen.blit(current_player, player_rect)
-        if player_rect.colliderect(rocket_rect) and not in_spaceship:
+        screen.blit(player.image, player.rect)
+        if player.rect.colliderect(rocket_rect) and not in_spaceship:
             points += 50
-        elif player_rect.colliderect(rocket_rect) and in_spaceship:
+        elif player.rect.colliderect(rocket_rect) and in_spaceship:
             points = points + 1000
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
 
         #Setting a point in the y axis that player can't go below
 
-        if not in_spaceship:
-            player_rect.y += player_gravity
-        if player_rect.y > 450 and not in_spaceship:
-            player_rect.y = 450
+
 
 
         #shooting collision(bomb)
@@ -304,13 +293,13 @@ while True:
                 respawnAfterCollision(monster3_rect)
 
         #poison collision
-        if player_rect.colliderect(poison_rect) and not in_spaceship:
+        if player.rect.colliderect(poison_rect) and not in_spaceship:
             respawnElement(poison_rect)
             text_color = 'Red'
             points -= 1000
             lives -= 1
             textChange_surf = text_change.render(f'Points: {points}', None, text_color)
-        elif player_rect.colliderect(poison_rect) and in_spaceship:
+        elif player.rect.colliderect(poison_rect) and in_spaceship:
             points += 1000
             respawnElement(poison_rect)
 
@@ -373,7 +362,7 @@ while True:
 
         #Spaceship object collision with player object
 
-        if player_rect.colliderect(spaceshipcollect_rect):
+        if player.rect.colliderect(spaceshipcollect_rect):
             in_spaceship = True
             current_time = pygame.time.get_ticks()
             contact_time = current_time
