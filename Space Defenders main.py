@@ -135,7 +135,7 @@ spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alp
 spaceshipdrive_rect = player.rect
 
 #Music
-bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.mp3")
+#bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.mp3")
 
 #Respawning mechanism for collidable/destroyable elements
 def respawnElement(enemy):
