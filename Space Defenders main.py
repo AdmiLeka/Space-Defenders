@@ -4,8 +4,6 @@ import time
 import pygame
 import random
 from sys import exit
-from stars import Star
-from background import BG
 
 game_active = False
 pygame.init()
@@ -60,12 +58,6 @@ class Player(pygame.sprite.Sprite):
         self.applyGravity()
         self.playerControls()
 
-
-#music
-
-song = pygame.mixer.Sound('music/music.wav')
-song.set_volume(0.5)
-
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
 instr_text = pygame.font.Font('font/Pixeltype.ttf', 75)
@@ -75,11 +67,6 @@ ss_rect3 = instr_text.render('Press P to start playing, A to shoot and SPACE to 
 ss_rect4 = ss_text.render('Eliminate: ', None, 'White')
 ss_rect5 = ss_text.render('Stay near/Collect: ', None, 'White')
 ss_rect6 = ss_text.render('Avoid: ', None, 'White')
-
-#Star background
-bg = BG()
-bg_group = pygame.sprite.Group()
-bg_group.add(bg)
 
 
 #player
