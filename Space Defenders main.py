@@ -30,6 +30,37 @@ in_spaceship = False
 uptrend = False
 downtrend = False
 
+#Player class
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        player1 = pygame.image.load('images/player.png').convert_alpha()
+        player2 = pygame.image.load('images/player2.png').convert_alpha()
+        self.playerImage = [player1, player2]
+        self.currentPlayer = 0
+        self.image = self.playerImage[current_player]
+        self.rect = self.image.get_rect(center = (150,550))
+        self.gravity = 0
+
+    def decidePlayerSprite(self):
+        if points > 100000:
+            self.currentPlayer = 1
+
+    def applyGravity(self):
+        self.gravity += 1
+
+    def playerControls(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and self.rect.y == 450:
+            self.gravity = -30
+
+    def update(self):
+        self.decidePlayerSprite()
+        self.applyGravity()
+        self.playerControls()
+
+
 #music
 
 song = pygame.mixer.Sound('music/music.wav')
@@ -62,6 +93,8 @@ current_player = player_surf
 #heart
 heart_surf = pygame.image.load('images/heart.png').convert_alpha()
 heart_rect = heart_surf.get_rect(center = (150, 550))
+collectible_heart_surf = pygame.image.load('images/heart.png').convert_alpha()
+collectible_heart_rect = collectible_heart_surf.get_rect(center = (150, 550))
 lives = 5
 #projectile
 bomb_surf = pygame.image.load('images/bomb.png').convert_alpha()
@@ -102,7 +135,7 @@ blast_rect = blast_surf.get_rect(midright = (1350, 300))
 
 
 rocket_surf = pygame.image.load('images/rocket.png').convert_alpha()
-rocket_rect = rocket_surf.get_rect(midright = (2000,150))
+rocket_rect = rocket_surf.get_rect(midright = (2000, 150))
 
 spaceshipcollect_surf = pygame.image.load('images/spaceshipcollect.png').convert_alpha()
 spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
@@ -148,11 +181,22 @@ def showHearts():
     global lives
     x = 40
     y = 40
-    increment = 50
-    for i in range(0,lives):
+    for i in range(0, lives):
         screen.blit(heart_surf, (x, y))
-        x+=increment
+        x += 50
 
+def collectHearts():
+    global lives
+    if collectible_heart_rect.x <= -100:
+        collectible_heart_rect.x = 5000
+    if player_rect.colliderect(collectible_heart_rect) and lives < 5:
+        lives += 1
+
+    collectible_heart_rect.x -= speed_of_things
+
+def dotheHearts():
+    showHearts()
+    collectHearts()
 
 
 while True:
@@ -214,8 +258,7 @@ while True:
         screen.fill('Black')
         #bg_group.draw(screen)
         screen.blit(ground, (0, 600))
-        showHearts()
-        #screen.blit(heart_surf, (90, 40))
+
         #gravity
         player_gravity += 1
 
@@ -319,6 +362,11 @@ while True:
         if poison_rect.x <= -100:
             poison_rect.x = 1350
 
+        #Hearts mechanisms
+        if lives < 5:
+            screen.blit(collectible_heart_surf, (5000, random.randint(0,500)))
+            dotheHearts()
+
         #Spawn mechanism of the rocket object
 
         screen.blit(rocket_surf, rocket_rect)
@@ -366,3 +414,5 @@ while True:
 
     pygame.display.update()
     clock.tick(60)
+
+
