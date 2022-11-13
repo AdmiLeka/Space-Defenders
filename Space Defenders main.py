@@ -1,6 +1,7 @@
 #Space Defenders
 import time
 import pygame
+from pygame import mixer
 import random
 from sys import exit
 
@@ -36,7 +37,7 @@ class Player(pygame.sprite.Sprite):
         spaceShip = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
         self.playerImage = [player1, player2, spaceShip]
         self.image = self.playerImage[0]
-        self.rect = self.image.get_rect(center = (150,550))
+        self.rect = self.image.get_rect(center=(150, 550))
         self.gravity = 0
 
     #Icon change when points > 100k
@@ -44,6 +45,8 @@ class Player(pygame.sprite.Sprite):
         if not in_spaceship:
             if points > 100000:
                 self.image = self.playerImage[1]
+            else:
+                self.image = self.playerImage[0]
         else:
             self.image = self.playerImage[2]
 
@@ -67,9 +70,17 @@ class Player(pygame.sprite.Sprite):
         self.applyGravity()
         self.playerControls()
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, image, coordinates):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(midright=coordinates)
+
 #Creation of player object
 player = Player()
-
+monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (1000, 400))
+monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (800, 500))
+monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (1100, 200))
 
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -135,7 +146,7 @@ spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alp
 spaceshipdrive_rect = player.rect
 
 #Music
-#bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.mp3")
+#bombSound = mixer.music.load("soundEffects/bombExplosion.mp3")
 
 #Respawning mechanism for collidable/destroyable elements
 def respawnElement(enemy):
