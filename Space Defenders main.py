@@ -28,23 +28,29 @@ uptrend = False
 downtrend = False
 
 #Player class
-
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         player1 = pygame.image.load('images/player.png').convert_alpha()
         player2 = pygame.image.load('images/player2.png').convert_alpha()
         spaceShip = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
+        bomb = pygame.image.load('images/bomb.png').convert_alpha()
+        blast = pygame.image.load('images/blast.png').convert_alpha()
         self.playerImage = [player1, player2, spaceShip]
+        self.playerWeapons = [bomb, blast]
         self.image = self.playerImage[0]
         self.rect = self.image.get_rect(center=(150, 550))
+        self.weapon = self.playerWeapons[0]
+        self.weaponRect = self.weapon.get_rect(midbottom=(1500, 800))
         self.gravity = 0
+        self.weaponSpeed = 28
 
     #Icon change when points > 100k
-    def decidePlayerSprite(self):
+    def transformPlayer(self):
         if not in_spaceship:
             if points > 100000:
                 self.image = self.playerImage[1]
+                self.weapon = self.playerWeapons[1]
             else:
                 self.image = self.playerImage[0]
         else:
@@ -63,24 +69,41 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
             self.gravity = -30
+        elif keys[pygame.K_a] and not in_spaceship and bomb_rect.x >= 1350:
+            self.weaponRect.x = self.weaponRect.x + 100
+            self.weaponRect.y = self.weaponRect.y + 50
+
+    def shoot(self):
+        if pygame.K_a in pygame.key.get_pressed():
+            if in_spaceship:
+                print("aaahhhaha")
+            else:
+                screen.blit(self.weapon, self.weaponRect)
+                self.weaponRect.x += self.weaponSpeed
 
     #Calling all the above functions
     def update(self):
-        self.decidePlayerSprite()
+        self.transformPlayer()
         self.applyGravity()
         self.playerControls()
+        self.shoot()
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, image, coordinates):
+    def __init__(self, image, coordinates, givesPoints):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midright=coordinates)
+        self.givesPoints = givesPoints
+
+    #def enemyEliminated(self):
+
 
 #Creation of player object
 player = Player()
-monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (1000, 400))
-monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (800, 500))
-monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (1100, 200))
+monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (1000, 400), 100)
+monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (800, 500), 80)
+monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (1100, 200), 70)
+
 
 #starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -233,11 +256,7 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a and bomb_rect.x >= 1350 and not in_spaceship:
                 if points < 100000:
-                    bomb_rect.x = player.rect.x + 100
-                    bomb_rect.y = player.rect.y + 50
-                elif points >= 100000 and blast_rect.x >= 1350:
-                    blast_rect.x = player.rect.x + 100
-                    blast_rect.y = player.rect.y + 50
+                    print("heh")
             elif event.key == pygame.K_a and bomb_rect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
                 missile1_rect.x = player.rect.x + 100
                 missile2_rect.x = player.rect.x + 100
