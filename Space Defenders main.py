@@ -20,7 +20,7 @@ text_end_time = 0
 spin_speed = 0
 text_rect = None
 text_color = 'White'
-speed_of_things = 5
+elementSpeed = 5
 current_time = 0
 contact_time = 0
 in_spaceship = False
@@ -82,22 +82,26 @@ class Player(pygame.sprite.Sprite):
     #         self.playerWeapons[2] = self.rect.y + 35
     #         self.playerWeapons[3] = self.rect.y + 155
 
+    def shootGun(self):
+        if player.weaponRect.x >= 1350:
+            self.weaponRect.x = self.rect.x + 100
+            self.weaponRect.y = self.rect.y + 50
+
     def shoot(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
-            if in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
-                print("Do something")
-            elif not in_spaceship and player.weaponRect.x >= 1350:
-                self.weaponRect.x = self.rect.x + 100
-                self.weaponRect.y = self.rect.y + 50
-        self.weaponRect.x += self.weaponSpeed
-
+            if in_spaceship:
+                pass
+               # self.shootMissiles()
+            else:
+                self.shootGun()
     # Calling all the above functions
     def update(self):
         self.transformPlayer()
         self.applyGravity()
         self.jump()
         self.shoot()
+        self.weaponRect.x += self.weaponSpeed
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -105,7 +109,6 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midright=coordinates)
-        self.speed = 7
         self.givesPoints = givesPoints
 
     def respawnEnemy(self):
@@ -113,7 +116,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = random.randint(0, 500)
 
     def enemyReappear(self):
-        self.rect.x -= self.speed
+        self.rect.x -= elementSpeed
         if self.rect.x <= -100:
             self.respawnEnemy()
 
@@ -239,7 +242,7 @@ def collectHearts():
     if player.rect.colliderect(collectible_heart_rect) and lives < 5:
         lives += 1
 
-    collectible_heart_rect.x -= speed_of_things
+    collectible_heart_rect.x -= elementSpeed
 
 def dotheHearts():
     showHearts()
@@ -307,21 +310,6 @@ while True:
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
 
-        #shooting collision(bomb)
-
-        # if points < 100000 and not in_spaceship:
-        #     if player.weaponRect.colliderect(monster1_rect):
-        #         respawnElement(monster1_rect)
-        #         addToPoints()
-        #         player.weaponRect.x = 1500
-        #     elif player.weaponRect.colliderect(monster2_rect):
-        #         respawnElement(monster2_rect)
-        #         addToPoints()
-        #         player.weaponRect.x = 1500
-        #     elif player.weaponRect.colliderect(monster3_rect):
-        #         respawnElement(monster3_rect)
-        #         addToPoints()
-        #         player.weaponRect.x = 1500
         #shooting collision (blast)
         if points > 100000 and not in_spaceship:
             if player.weaponRect.colliderect(monster1_rect):
@@ -356,19 +344,6 @@ while True:
 
         #elimination, respawn mechanism
 
-        # screen.blit(monster1_surf, monster1_rect)
-        # monster1_rect.x -= speed_of_things
-        # if monster1_rect.x <= -100:
-        #     respawnElement(monster1_rect)
-        # screen.blit(monster2_surf, monster2_rect)
-        # monster2_rect.x -= speed_of_things
-        # if monster2_rect.x <= -100:
-        #     respawnElement(monster2_rect)
-        # screen.blit(monster3_surf, monster3_rect)
-        # monster3_rect.x -= speed_of_things
-        # if monster3_rect.x <= -100:
-        #     respawnElement(monster3_rect)
-
         #shooting
 
         screen.blit(missile1_surf, missile1_rect)
@@ -379,7 +354,7 @@ while True:
 
         rotated = pygame.transform.rotate(poison_surf, spin_speed)
         screen.blit(rotated, poison_rect)
-        poison_rect.x -= speed_of_things
+        poison_rect.x -= elementSpeed
         spin_speed += 1
         if poison_rect.x <= -100:
             poison_rect.x = 1350
@@ -392,7 +367,7 @@ while True:
         #Spawn mechanism of the rocket object
 
         screen.blit(rocket_surf, rocket_rect)
-        rocket_rect.x -= speed_of_things
+        rocket_rect.x -= elementSpeed
         if rocket_rect.x <= -100:
             respawnElement(rocket_rect)
 
@@ -412,10 +387,10 @@ while True:
             in_spaceship = True
             current_time = pygame.time.get_ticks()
             contact_time = current_time
-            speed_of_things = 19
+            elementSpeed = 19
             points += 1000
         if current_time >= contact_time + 5000:
-            speed_of_things = 7
+            elementSpeed = 7
             in_spaceship = False
             uptrend = False
             downtrend = False
