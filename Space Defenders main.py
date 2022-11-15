@@ -36,8 +36,12 @@ class Player(pygame.sprite.Sprite):
         spaceShip = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
         bomb = pygame.image.load('images/bomb.png').convert_alpha()
         blast = pygame.image.load('images/blast.png').convert_alpha()
+        missile1 = pygame.image.load('images/missile1.png').convert_alpha()
+        missile2 = pygame.image.load('images/missile2.png').convert_alpha()
+        missile1Rect = missile1.get_rect(midbottom=(1500, 800))
+        missile2Rect = missile2.get_rect(midbottom=(1500, 800))
         self.playerImage = [player1, player2, spaceShip]
-        self.playerWeapons = [bomb, blast]
+        self.playerWeapons = [bomb, blast, missile1, missile2]
         self.image = self.playerImage[0]
         self.rect = self.image.get_rect(center=(150, 550))
         self.weapon = self.playerWeapons[0]
@@ -65,17 +69,24 @@ class Player(pygame.sprite.Sprite):
             player.rect.y = 450
 
     #Jump and shoot mechanic
-    def playerControls(self):
+    def jump(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
             self.gravity = -30
 
+    # def shootMissiles(self):
+    #     if in_spaceship and pygame.K_a in pygame.key.get_pressed() and self.playerWeapons[2].x >= 1350 and self.playerWeapons[3].x >= 1350:
+    #         self.playerWeapons[2] = self.rect.x + 100
+    #         self.playerWeapons[3] = self.rect.x + 100
+    #         self.playerWeapons[2] = self.rect.y + 35
+    #         self.playerWeapons[3] = self.rect.y + 155
+
     def shoot(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
-            if in_spaceship:
+            if in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
                 print("Do something")
-            elif player.weaponRect.x >= 1350:
+            elif not in_spaceship and player.weaponRect.x >= 1350:
                 self.weaponRect.x = self.rect.x + 100
                 self.weaponRect.y = self.rect.y + 50
         self.weaponRect.x += self.weaponSpeed
@@ -84,7 +95,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.transformPlayer()
         self.applyGravity()
-        self.playerControls()
+        self.jump()
         self.shoot()
 
 class Enemy(pygame.sprite.Sprite):
@@ -92,12 +103,32 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midright=coordinates)
+        self.speed = 5
         self.givesPoints = givesPoints
 
-    #def enemyEliminated(self):
+    def respawnEnemy(self):
+        self.rect.x = 1350
+        self.rect.y = random.randint(0, 500)
+
+    def enemyReappear(self):
+        if self.rect.x <= -100:
+            self.respawnEnemy()
 
 
-#Creation of player object
+    def enemyEliminated(self):
+        if player.weaponRect.colliderect(self.rect):
+            self.respawnEnemy()
+            addToPoints()
+            player.weaponRect.x = 1500
+
+    def update(self):
+        self.respawnEnemy()
+        self.enemyReappear()
+        self.enemyEliminated()
+        self.rect.x -= 5
+
+
+#Creation of player and enemy instances
 player = Player()
 monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (1000, 400), 100)
 monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (800, 500), 80)
@@ -139,10 +170,6 @@ monster2_rect = monster2_surf.get_rect(midright = (800,500))
 
 monster3_surf = pygame.image.load('images/monster3.png').convert_alpha()
 monster3_rect = monster3_surf.get_rect(midright = (1100,200))
-
-#Enemies list
-
-enemies = [monster1_rect, monster2_rect, monster3_rect]
 
 #avoid
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
@@ -247,10 +274,7 @@ while True:
             if event.key == pygame.K_p:
                 game_active = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a and player.weaponRect.x >= 1350 and not in_spaceship:
-                if points < 100000:
-                    print("heh")
-            elif event.key == pygame.K_a and player.weaponRect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
+            if event.key == pygame.K_a and player.weaponRect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
                 missile1_rect.x = player.rect.x + 100
                 missile2_rect.x = player.rect.x + 100
                 missile1_rect.y = player.rect.y + 35
@@ -268,19 +292,21 @@ while True:
 
         #RocketColision
         player.update()
+        monster1.update()
+        monster2.update()
+        monster3.update()
         screen.blit(player.image, player.rect)
         screen.blit(player.weapon, player.weaponRect)
+        screen.blit(monster1.image, monster1.rect)
+        screen.blit(monster2.image, monster2.rect)
+        screen.blit(monster3.image, monster3.rect)
+
         if player.rect.colliderect(rocket_rect) and not in_spaceship:
             points += 50
         elif player.rect.colliderect(rocket_rect) and in_spaceship:
             points = points + 1000
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
-
-        #Setting a point in the y axis that player can't go below
-
-
-
 
         #shooting collision(bomb)
 
