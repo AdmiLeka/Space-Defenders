@@ -7,6 +7,7 @@ from sys import exit
 
 game_active = False
 pygame.init()
+pygame.display.set_caption('Space Defenders')
 clock = pygame.time.Clock()
 ground = pygame.surface.Surface((1300, 600))
 ground.fill('Grey')
@@ -19,7 +20,6 @@ text_end_time = 0
 spin_speed = 0
 text_rect = None
 text_color = 'White'
-caption = pygame.display.set_caption('Space Defenders')
 speed_of_things = 5
 current_time = 0
 contact_time = 0
@@ -27,7 +27,8 @@ in_spaceship = False
 uptrend = False
 downtrend = False
 
-#Player class
+
+# Player class
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -49,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0
         self.weaponSpeed = 28
 
-    #Icon change when points > 100k
+    # Icon change when points > 100k
     def transformPlayer(self):
         if not in_spaceship:
             if points > 100000:
@@ -60,7 +61,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image = self.playerImage[2]
 
-    #Gravity mechanism
+    # Gravity mechanism
     def applyGravity(self):
         self.gravity += 1
         if not in_spaceship:
@@ -68,7 +69,7 @@ class Player(pygame.sprite.Sprite):
         if player.rect.y > 450 and not in_spaceship:
             player.rect.y = 450
 
-    #Jump and shoot mechanic
+    # Jump and shoot mechanic
     def jump(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
@@ -91,51 +92,50 @@ class Player(pygame.sprite.Sprite):
                 self.weaponRect.y = self.rect.y + 50
         self.weaponRect.x += self.weaponSpeed
 
-    #Calling all the above functions
+    # Calling all the above functions
     def update(self):
         self.transformPlayer()
         self.applyGravity()
         self.jump()
         self.shoot()
 
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, image, coordinates, givesPoints):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midright=coordinates)
-        self.speed = 5
+        self.speed = 7
         self.givesPoints = givesPoints
 
     def respawnEnemy(self):
-        self.rect.x = 1350
+        self.rect.x = random.randint(1450, 1800)
         self.rect.y = random.randint(0, 500)
 
     def enemyReappear(self):
+        self.rect.x -= self.speed
         if self.rect.x <= -100:
             self.respawnEnemy()
 
-
     def enemyEliminated(self):
-        if player.weaponRect.colliderect(self.rect):
+        global points
+        if not in_spaceship and player.weaponRect.colliderect(self.rect):
             self.respawnEnemy()
-            addToPoints()
+            points += self.givesPoints
             player.weaponRect.x = 1500
 
     def update(self):
-        self.respawnEnemy()
         self.enemyReappear()
         self.enemyEliminated()
-        self.rect.x -= 5
 
-
-#Creation of player and enemy instances
+# Creation of player and enemy instances
 player = Player()
-monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (1000, 400), 100)
-monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (800, 500), 80)
-monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (1100, 200), 70)
 
+monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (-100, 400), 100)
+monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (-100, 500), 80)
+monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100, 200), 70)
 
-#starting screen stuff
+# Starting screen stuff
 ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
 instr_text = pygame.font.Font('font/Pixeltype.ttf', 75)
 ss_rect = ss_text.render('WELCOME TO: ', None, 'White')
@@ -269,7 +269,6 @@ while True:
             uptrend = False
         elif event.type == pygame.KEYUP and event.key == pygame.K_DOWN and in_spaceship:
             downtrend = False
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 game_active = True
@@ -310,21 +309,21 @@ while True:
 
         #shooting collision(bomb)
 
-        if points < 100000 and not in_spaceship:
-            if player.weaponRect.colliderect(monster1_rect):
-                respawnElement(monster1_rect)
-                addToPoints()
-                player.weaponRect.x = 1500
-            elif player.weaponRect.colliderect(monster2_rect):
-                respawnElement(monster2_rect)
-                addToPoints()
-                player.weaponRect.x = 1500
-            elif player.weaponRect.colliderect(monster3_rect):
-                respawnElement(monster3_rect)
-                addToPoints()
-                player.weaponRect.x = 1500
+        # if points < 100000 and not in_spaceship:
+        #     if player.weaponRect.colliderect(monster1_rect):
+        #         respawnElement(monster1_rect)
+        #         addToPoints()
+        #         player.weaponRect.x = 1500
+        #     elif player.weaponRect.colliderect(monster2_rect):
+        #         respawnElement(monster2_rect)
+        #         addToPoints()
+        #         player.weaponRect.x = 1500
+        #     elif player.weaponRect.colliderect(monster3_rect):
+        #         respawnElement(monster3_rect)
+        #         addToPoints()
+        #         player.weaponRect.x = 1500
         #shooting collision (blast)
-        elif points > 100000 and not in_spaceship:
+        if points > 100000 and not in_spaceship:
             if player.weaponRect.colliderect(monster1_rect):
                 respawnElement(monster1_rect)
                 addToPoints()
@@ -357,18 +356,18 @@ while True:
 
         #elimination, respawn mechanism
 
-        screen.blit(monster1_surf, monster1_rect)
-        monster1_rect.x -= speed_of_things
-        if monster1_rect.x <= -100:
-            respawnElement(monster1_rect)
-        screen.blit(monster2_surf, monster2_rect)
-        monster2_rect.x -= speed_of_things
-        if monster2_rect.x <= -100:
-            respawnElement(monster2_rect)
-        screen.blit(monster3_surf, monster3_rect)
-        monster3_rect.x -= speed_of_things
-        if monster3_rect.x <= -100:
-            respawnElement(monster3_rect)
+        # screen.blit(monster1_surf, monster1_rect)
+        # monster1_rect.x -= speed_of_things
+        # if monster1_rect.x <= -100:
+        #     respawnElement(monster1_rect)
+        # screen.blit(monster2_surf, monster2_rect)
+        # monster2_rect.x -= speed_of_things
+        # if monster2_rect.x <= -100:
+        #     respawnElement(monster2_rect)
+        # screen.blit(monster3_surf, monster3_rect)
+        # monster3_rect.x -= speed_of_things
+        # if monster3_rect.x <= -100:
+        #     respawnElement(monster3_rect)
 
         #shooting
 
@@ -437,5 +436,3 @@ while True:
 
     pygame.display.update()
     clock.tick(60)
-
-
