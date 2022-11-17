@@ -50,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0
         self.weaponSpeed = 28
 
-    # Icon change when points > 100k
+    # Icon change when points > 100k or when spaceship is collected
     def transformPlayer(self):
         if not in_spaceship:
             if points > 100000:
@@ -69,7 +69,7 @@ class Player(pygame.sprite.Sprite):
         if player.rect.y > 450 and not in_spaceship:
             player.rect.y = 450
 
-    # Jump and shoot mechanic
+    # Jump mechanic
     def jump(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
@@ -95,6 +95,7 @@ class Player(pygame.sprite.Sprite):
                # self.shootMissiles()
             else:
                 self.shootGun()
+
     # Calling all the above functions
     def update(self):
         self.transformPlayer()
@@ -138,15 +139,9 @@ monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (-100
 monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (-100, 500), 80)
 monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100, 200), 70)
 
-# Starting screen stuff
-ss_text = pygame.font.Font('font/Pixeltype.ttf', 100)
-instr_text = pygame.font.Font('font/Pixeltype.ttf', 75)
-ss_rect = ss_text.render('WELCOME TO: ', None, 'White')
-ss_rect2 = ss_text.render('SPACE DEFENDERS', None, 'White')
-ss_rect3 = instr_text.render('Press P to start playing, A to shoot and SPACE to jump.', None, 'White')
-ss_rect4 = ss_text.render('Eliminate: ', None, 'White')
-ss_rect5 = ss_text.render('Stay near/Collect: ', None, 'White')
-ss_rect6 = ss_text.render('Avoid: ', None, 'White')
+# Font initialization
+font100 = pygame.font.Font('font/Pixeltype.ttf', 100)
+font75 = pygame.font.Font('font/Pixeltype.ttf', 75)
 
 #heart
 heart_surf = pygame.image.load('images/heart.png').convert_alpha()
@@ -185,7 +180,23 @@ spaceshipdrive_rect = player.rect
 #Music
 #bombSound = mixer.music.load("soundEffects/bombExplosion.mp3")
 
-#Respawning mechanism for collidable/destroyable elements
+
+# Main menu display
+def displayMainMenu():
+    screen.fill('Black')
+    screen.blit(font100.render('WELCOME TO: ', False, 'White'), (50, 50))
+    screen.blit(font100.render('SPACE DEFENDERS', False, 'White'), (50, 110))
+    screen.blit(font75.render('Press P to start playing, A to shoot and SPACE to jump.', False, 'White'), (50, 170))
+    screen.blit(font100.render('Stay near/Collect: ', False, 'White'), (50, 280))
+    screen.blit(pygame.transform.scale(spaceshipcollect_surf, (170, 100)), (640, 250))
+    screen.blit(rocket_surf, (800, 230))
+    screen.blit(font100.render('Avoid: ', False, 'White'), (50, 420))
+    screen.blit(poison_surf, (250, 360))
+    screen.blit(font100.render('Eliminate: ', False, 'White'), (50, 570))
+    screen.blit(pygame.transform.scale(monster1.image, (100, 100)), (400, 540))
+    screen.blit(pygame.transform.scale(monster2.image, (100, 100)), (550, 540))
+    screen.blit(pygame.transform.scale(monster3.image, (100, 100)), (700, 540))
+
 def respawnElement(enemy):
     enemy.x = 1350
     enemy.y = random.randint(0, 500)
@@ -386,19 +397,7 @@ while True:
             uptrend = False
             downtrend = False
     else:
-        screen.fill('Black')
-        screen.blit(ss_rect, (50,50))
-        screen.blit(ss_rect2, (50, 110))
-        screen.blit(ss_rect3, (50, 170))
-        screen.blit(ss_rect5, (50, 280))
-        screen.blit(pygame.transform.scale(spaceshipcollect_surf, (170, 100)), (640, 250))
-        screen.blit(rocket_surf, (800, 230))
-        screen.blit(ss_rect6, (50, 420))
-        screen.blit(poison_surf, (250, 360))
-        screen.blit(ss_rect4, (50, 570))
-        screen.blit(pygame.transform.scale(monster1.image, (100, 100)), (400, 540))
-        screen.blit(pygame.transform.scale(monster2.image, (100, 100)), (550, 540))
-        screen.blit(pygame.transform.scale(monster3.image, (100, 100)), (700, 540))
+        displayMainMenu()
 
     pygame.display.update()
     clock.tick(60)
