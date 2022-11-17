@@ -164,15 +164,6 @@ missile2_rect = missile2_surf.get_rect(midbottom = (1500, 800))
 #elimination
 points_text = pygame.font.Font('font/Pixeltype.ttf', 40)
 
-#eliminate
-monster1_surf = pygame.image.load('images/monster1.png').convert_alpha()
-monster1_rect = monster1_surf.get_rect(midright = (1000,400))
-
-monster2_surf = pygame.image.load('images/monster2.png').convert_alpha()
-monster2_rect = monster2_surf.get_rect(midright = (800,500))
-
-monster3_surf = pygame.image.load('images/monster3.png').convert_alpha()
-monster3_rect = monster3_surf.get_rect(midright = (1100,200))
 
 #avoid
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
@@ -312,24 +303,24 @@ while True:
 
         #shooting collision (blast)
         if points > 100000 and not in_spaceship:
-            if player.weaponRect.colliderect(monster1_rect):
-                respawnElement(monster1_rect)
+            if player.weaponRect.colliderect(monster1.rect):
+                respawnElement(monster1.rect)
                 addToPoints()
-            elif player.weaponRect.colliderect(monster2_rect):
-                respawnElement(monster2_rect)
+            elif player.weaponRect.colliderect(monster2.rect):
+                respawnElement(monster2.rect)
                 addToPoints()
-            elif player.weaponRect.colliderect(monster3_rect):
-                respawnElement(monster3_rect)
+            elif player.weaponRect.colliderect(monster3.rect):
+                respawnElement(monster3.rect)
                 addToPoints()
 
         #Collision mechanics with rocketship and rocketship's missles and respawn
         elif in_spaceship:
-            if hasCollided(monster1_rect):
-                respawnAfterCollision(monster1_rect)
-            elif hasCollided(monster2_rect):
-                respawnAfterCollision(monster2_rect)
-            elif hasCollided(monster3_rect):
-                respawnAfterCollision(monster3_rect)
+            if hasCollided(monster1.rect):
+                respawnAfterCollision(monster1.rect)
+            elif hasCollided(monster2.rect):
+                respawnAfterCollision(monster2.rect)
+            elif hasCollided(monster3.rect):
+                respawnAfterCollision(monster3.rect)
 
         #poison collision
         if player.rect.colliderect(poison_rect) and not in_spaceship:
@@ -405,9 +396,9 @@ while True:
         screen.blit(ss_rect6, (50, 420))
         screen.blit(poison_surf, (250, 360))
         screen.blit(ss_rect4, (50, 570))
-        screen.blit(pygame.transform.scale(monster1_surf, (100, 100)), (400, 540))
-        screen.blit(pygame.transform.scale(monster2_surf, (100, 100)), (550, 540))
-        screen.blit(pygame.transform.scale(monster3_surf, (100, 100)), (700, 540))
+        screen.blit(pygame.transform.scale(monster1.image, (100, 100)), (400, 540))
+        screen.blit(pygame.transform.scale(monster2.image, (100, 100)), (550, 540))
+        screen.blit(pygame.transform.scale(monster3.image, (100, 100)), (700, 540))
 
     pygame.display.update()
     clock.tick(60)
