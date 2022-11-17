@@ -149,12 +149,23 @@ class Enemy(pygame.sprite.Sprite):
         self.gunCollision()
         self.spaceshipCollision()
 
+
+class Collectible(pygame.sprite.Sprite):
+    def __init__(self, image, coordinates, givesPoints):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(midbottom=coordinates)
+        self.givesPoints = givesPoints
+
 # Creation of player and enemy instances
 player = Player()
 
 monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (-100, 400), 100)
 monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (-100, 500), 80)
 monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100, 200), 70)
+spaceship = Collectible(pygame.image.load('images/spaceshipcollect.png').convert_alpha(), (-200, 800), 500)
+poison = Collectible(pygame.image.load('images/poison.png').convert_alpha(), (1700, 300), -1000)
+
 
 # Font initialization
 font100 = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -352,9 +363,7 @@ while True:
         if lives < 5:
             screen.blit(collectible_heart_surf, (5000, random.randint(0,500)))
             dotheHearts()
-
         #Spawn mechanism of the rocket object
-
         screen.blit(rocket_surf, rocket_rect)
         rocket_rect.x -= elementSpeed
         if rocket_rect.x <= -100:
