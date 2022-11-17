@@ -37,16 +37,16 @@ class Player(pygame.sprite.Sprite):
         spaceShip = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
         bomb = pygame.image.load('images/bomb.png').convert_alpha()
         blast = pygame.image.load('images/blast.png').convert_alpha()
-        missile1 = pygame.image.load('images/missile1.png').convert_alpha()
-        missile2 = pygame.image.load('images/missile2.png').convert_alpha()
-        missile1Rect = missile1.get_rect(midbottom=(1500, 800))
-        missile2Rect = missile2.get_rect(midbottom=(1500, 800))
+        self.missile1 = pygame.image.load('images/missile1.png').convert_alpha()
+        self.missile2 = pygame.image.load('images/missile2.png').convert_alpha()
         self.playerImage = [player1, player2, spaceShip]
-        self.playerWeapons = [bomb, blast, missile1, missile2]
+        self.playerWeapons = [bomb, blast]
         self.image = self.playerImage[0]
         self.rect = self.image.get_rect(center=(150, 550))
         self.weapon = self.playerWeapons[0]
         self.weaponRect = self.weapon.get_rect(midbottom=(1500, 800))
+        self.missile1Rect = self.missile1.get_rect(midbottom=(1500, 800))
+        self.missile2Rect = self.missile1.get_rect(midbottom=(1500, 800))
         self.gravity = 0
         self.weaponSpeed = 28
 
@@ -58,6 +58,7 @@ class Player(pygame.sprite.Sprite):
                 self.weapon = self.playerWeapons[1]
             else:
                 self.image = self.playerImage[0]
+                self.weapon = self.playerWeapons[0]
         else:
             self.image = self.playerImage[2]
 
@@ -75,12 +76,12 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
             self.gravity = -30
 
-    # def shootMissiles(self):
-    #     if in_spaceship and pygame.K_a in pygame.key.get_pressed() and self.playerWeapons[2].x >= 1350 and self.playerWeapons[3].x >= 1350:
-    #         self.playerWeapons[2] = self.rect.x + 100
-    #         self.playerWeapons[3] = self.rect.x + 100
-    #         self.playerWeapons[2] = self.rect.y + 35
-    #         self.playerWeapons[3] = self.rect.y + 155
+    def shootMissiles(self):
+        if self.missile1Rect.x >= 1350 and self.missile2Rect.x >= 1350:
+            self.missile1Rect.x = self.rect.x + 100
+            self.missile2Rect.x = self.rect.x + 100
+            self.missile1Rect.y = self.rect.y + 35
+            self.missile2Rect.y = self.rect.y + 155
 
     def shootGun(self):
         if player.weaponRect.x >= 1350:
@@ -91,8 +92,7 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             if in_spaceship:
-                pass
-               # self.shootMissiles()
+                self.shootMissiles()
             else:
                 self.shootGun()
 
@@ -103,6 +103,8 @@ class Player(pygame.sprite.Sprite):
         self.jump()
         self.shoot()
         self.weaponRect.x += self.weaponSpeed
+        self.missile1Rect.x += self.weaponSpeed
+        self.missile2Rect.x += self.weaponSpeed
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -112,25 +114,40 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midright=coordinates)
         self.givesPoints = givesPoints
 
-    def respawnEnemy(self):
+    def respawnSelf(self):
         self.rect.x = random.randint(1450, 1800)
         self.rect.y = random.randint(0, 500)
 
     def enemyReappear(self):
         self.rect.x -= elementSpeed
         if self.rect.x <= -100:
-            self.respawnEnemy()
+            self.respawnSelf()
 
-    def enemyEliminated(self):
+    def missileCollision(self):
         global points
-        if not in_spaceship and player.weaponRect.colliderect(self.rect):
-            self.respawnEnemy()
+        if in_spaceship:
+            if player.missile1Rect.colliderect(self.rect) or player.missile2Rect.colliderect(self.rect):
+                self.respawnSelf()
+                points += self.givesPoints
+
+    def gunCollision(self):
+        global points
+        if player.weaponRect.colliderect(self.rect):
+            self.respawnSelf()
             points += self.givesPoints
             player.weaponRect.x = 1500
 
+    def spaceshipCollision(self):
+        global points
+        if in_spaceship and self.rect.colliderect(player.rect):
+            points += self.givesPoints
+            self.respawnSelf()
+
     def update(self):
         self.enemyReappear()
-        self.enemyEliminated()
+        self.missileCollision()
+        self.gunCollision()
+        self.spaceshipCollision()
 
 # Creation of player and enemy instances
 player = Player()
@@ -150,11 +167,7 @@ collectible_heart_surf = pygame.image.load('images/heart.png').convert_alpha()
 collectible_heart_rect = collectible_heart_surf.get_rect(center = (150, 550))
 lives = 5
 
-missile1_surf = pygame.image.load('images/missile1.png').convert_alpha()
-missile1_rect = missile1_surf.get_rect(midbottom = (1500, 800))
 
-missile2_surf = pygame.image.load('images/missile2.png').convert_alpha()
-missile2_rect = missile2_surf.get_rect(midbottom = (1500, 800))
 
 #elimination
 points_text = pygame.font.Font('font/Pixeltype.ttf', 40)
@@ -165,17 +178,12 @@ poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
 points = 0
-text_change = pygame.font.Font('font/Pixeltype.ttf', 100)
-
 
 rocket_surf = pygame.image.load('images/rocket.png').convert_alpha()
 rocket_rect = rocket_surf.get_rect(midright = (2000, 150))
 
 spaceshipcollect_surf = pygame.image.load('images/spaceshipcollect.png').convert_alpha()
 spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
-
-spaceshipdrive_surf = pygame.image.load('images/spaceshipdrive.png').convert_alpha()
-spaceshipdrive_rect = player.rect
 
 #Music
 #bombSound = mixer.music.load("soundEffects/bombExplosion.mp3")
@@ -277,12 +285,6 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 game_active = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a and player.weaponRect.x >= 1350 and in_spaceship and missile1_rect.x >= 1350 and missile2_rect.x >= 1350:
-                missile1_rect.x = player.rect.x + 100
-                missile2_rect.x = player.rect.x + 100
-                missile1_rect.y = player.rect.y + 35
-                missile2_rect.y = player.rect.y + 155
 
     if game_active:
         updateTextColor()
@@ -301,6 +303,8 @@ while True:
         monster3.update()
         screen.blit(player.image, player.rect)
         screen.blit(player.weapon, player.weaponRect)
+        screen.blit(player.missile1, player.missile1Rect)
+        screen.blit(player.missile2, player.missile2Rect)
         screen.blit(monster1.image, monster1.rect)
         screen.blit(monster2.image, monster2.rect)
         screen.blit(monster3.image, monster3.rect)
@@ -324,34 +328,17 @@ while True:
                 respawnElement(monster3.rect)
                 addToPoints()
 
-        #Collision mechanics with rocketship and rocketship's missles and respawn
-        elif in_spaceship:
-            if hasCollided(monster1.rect):
-                respawnAfterCollision(monster1.rect)
-            elif hasCollided(monster2.rect):
-                respawnAfterCollision(monster2.rect)
-            elif hasCollided(monster3.rect):
-                respawnAfterCollision(monster3.rect)
-
         #poison collision
         if player.rect.colliderect(poison_rect) and not in_spaceship:
             respawnElement(poison_rect)
             text_color = 'Red'
             points -= 1000
             lives -= 1
-            textChange_surf = text_change.render(f'Points: {points}', None, text_color)
+            textChange_surf = font100.render(f'Points: {points}', None, text_color)
         elif player.rect.colliderect(poison_rect) and in_spaceship:
             points += 1000
             respawnElement(poison_rect)
 
-        #elimination, respawn mechanism
-
-        #shooting
-
-        screen.blit(missile1_surf, missile1_rect)
-        missile1_rect.x += projectile_speed
-        screen.blit(missile2_surf, missile2_rect)
-        missile2_rect.x += projectile_speed
         #Rotation and movement mechanism for poison object
 
         rotated = pygame.transform.rotate(poison_surf, spin_speed)
@@ -373,7 +360,7 @@ while True:
         if rocket_rect.x <= -100:
             respawnElement(rocket_rect)
 
-        textChange_surf = text_change.render(f'Points: {points}', None, text_color)
+        textChange_surf = font100.render(f'Points: {points}', None, text_color)
         screen.blit(textChange_surf, (850, 40))
 
         # Spaceship spawn mechanism
