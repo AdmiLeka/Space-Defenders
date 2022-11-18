@@ -118,11 +118,6 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = random.randint(1450, 1800)
         self.rect.y = random.randint(0, 500)
 
-    def enemyReappear(self):
-        self.rect.x -= elementSpeed
-        if self.rect.x <= -100:
-            self.respawnSelf()
-
     def missileCollision(self):
         global points
         if in_spaceship:
@@ -133,6 +128,7 @@ class Enemy(pygame.sprite.Sprite):
     def gunCollision(self):
         global points
         if player.weaponRect.colliderect(self.rect):
+            pygame.mixer.Sound.play(bombSound)
             self.respawnSelf()
             points += self.givesPoints
             player.weaponRect.x = 1500
@@ -144,10 +140,11 @@ class Enemy(pygame.sprite.Sprite):
             self.respawnSelf()
 
     def update(self):
-        self.enemyReappear()
+        redrawElement(self.rect)
         self.missileCollision()
         self.gunCollision()
         self.spaceshipCollision()
+        self.rect.x -= elementSpeed
 
 
 class Collectible(pygame.sprite.Sprite):
@@ -178,6 +175,15 @@ collectible_heart_surf = pygame.image.load('images/heart.png').convert_alpha()
 collectible_heart_rect = collectible_heart_surf.get_rect(center = (150, 550))
 lives = 5
 
+def redrawElement(element):
+    if element.x <= -150:
+        element.x = random.randint(1400, 1850)
+        element.y = random.randint(0, 500)
+
+
+def respawnElement(element):
+    element.x = random.randint(1450, 1900)
+    element.y = random.randint(0, 500)
 
 
 #elimination
@@ -196,8 +202,8 @@ rocket_rect = rocket_surf.get_rect(midright = (2000, 150))
 spaceshipcollect_surf = pygame.image.load('images/spaceshipcollect.png').convert_alpha()
 spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 
-#Music
-#bombSound = mixer.music.load("soundEffects/bombExplosion.mp3")
+# Music and sound effects
+bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.wav")
 
 
 # Main menu display
@@ -216,9 +222,7 @@ def displayMainMenu():
     screen.blit(pygame.transform.scale(monster2.image, (100, 100)), (550, 540))
     screen.blit(pygame.transform.scale(monster3.image, (100, 100)), (700, 540))
 
-def respawnElement(enemy):
-    enemy.x = 1350
-    enemy.y = random.randint(0, 500)
+
 
 #Managing the score
 def addToPoints():
@@ -356,8 +360,7 @@ while True:
         screen.blit(rotated, poison_rect)
         poison_rect.x -= elementSpeed
         spin_speed += 1
-        if poison_rect.x <= -100:
-            poison_rect.x = 1350
+        redrawElement(poison_rect)
 
         #Hearts mechanisms
         if lives < 5:
