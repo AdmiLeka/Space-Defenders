@@ -15,10 +15,7 @@ DISPLAY_WIDTH = 1300
 DISPLAY_HEIGHT = 650
 DISPLAY_SIZE = (DISPLAY_WIDTH, DISPLAY_HEIGHT)
 screen = pygame.display.set_mode(DISPLAY_SIZE)
-projectile_speed = 28
-text_end_time = 0
 spin_speed = 0
-text_rect = None
 text_color = 'White'
 elementSpeed = 5
 current_time = 0
@@ -76,6 +73,13 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_SPACE] and self.rect.y == 450 and not in_spaceship:
             self.gravity = -30
 
+    # Player weapon shooting mechanic
+    def shootGun(self):
+        if player.weaponRect.x >= 1350:
+            self.weaponRect.x = self.rect.x + 100
+            self.weaponRect.y = self.rect.y + 50
+
+    # Missile shooting mechanic
     def shootMissiles(self):
         if self.missile1Rect.x >= 1350 and self.missile2Rect.x >= 1350:
             self.missile1Rect.x = self.rect.x + 100
@@ -83,11 +87,7 @@ class Player(pygame.sprite.Sprite):
             self.missile1Rect.y = self.rect.y + 35
             self.missile2Rect.y = self.rect.y + 155
 
-    def shootGun(self):
-        if player.weaponRect.x >= 1350:
-            self.weaponRect.x = self.rect.x + 100
-            self.weaponRect.y = self.rect.y + 50
-
+    # Shooting the correct weapon based on conditions
     def shoot(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -128,7 +128,7 @@ class Enemy(pygame.sprite.Sprite):
     def gunCollision(self):
         global points
         if player.weaponRect.colliderect(self.rect):
-            pygame.mixer.Sound.play(bombSound)
+            playThis(bombSound)
             self.respawnSelf()
             points += self.givesPoints
             player.weaponRect.x = 1500
@@ -167,6 +167,7 @@ poison = Collectible(pygame.image.load('images/poison.png').convert_alpha(), (17
 # Font initialization
 font100 = pygame.font.Font('font/Pixeltype.ttf', 100)
 font75 = pygame.font.Font('font/Pixeltype.ttf', 75)
+font40 = pygame.font.Font('font/Pixeltype.ttf', 40)
 
 #heart
 heart_surf = pygame.image.load('images/heart.png').convert_alpha()
@@ -185,11 +186,6 @@ def respawnElement(element):
     element.x = random.randint(1450, 1900)
     element.y = random.randint(0, 500)
 
-
-#elimination
-points_text = pygame.font.Font('font/Pixeltype.ttf', 40)
-
-
 #avoid
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
@@ -204,6 +200,11 @@ spaceshipcollect_rect = spaceshipcollect_surf.get_rect(midbottom = (-200, 800))
 
 # Music and sound effects
 bombSound = pygame.mixer.Sound("soundEffects/bombExplosion.wav")
+
+
+# Function to play sound effect
+def playThis(sound):
+    pygame.mixer.Sound.play(sound)
 
 
 # Main menu display
@@ -237,20 +238,6 @@ def updateTextColor():
         text_color = "Red"
     else:
         text_color = "White"
-
-def hasCollided(enemyRect):
-    global missile1_rect, missile2_rect, spaceshipdrive_rect
-    if (missile1_rect.colliderect(enemyRect) or missile2_rect.colliderect(enemyRect) or spaceshipdrive_rect.colliderect(enemyRect)):
-        return True
-
-def respawnAfterCollision(enemyRect):
-    global missile1_rect, missile2_rect
-    respawnElement(enemyRect)
-    addToPoints()
-    if missile1_rect.colliderect(enemyRect):
-        missile1_rect.x = 1500
-    elif missile2_rect.colliderect(enemyRect):
-        missile2_rect.x = 1500
 
 def showHearts():
     global lives
@@ -304,11 +291,9 @@ while True:
     if game_active:
         updateTextColor()
 
-        #bg_group.update()
         current_time = pygame.time.get_ticks()
 
         screen.fill('Black')
-        #bg_group.draw(screen)
         screen.blit(ground, (0, 600))
 
         #RocketColision
