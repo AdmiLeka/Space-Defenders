@@ -131,7 +131,8 @@ class Enemy(pygame.sprite.Sprite):
             playThis(bombSound)
             self.respawnSelf()
             points += self.givesPoints
-            player.weaponRect.x = 1500
+            if points < 100000:
+                player.weaponRect.x = 1500
 
     def spaceshipCollision(self):
         global points
@@ -154,9 +155,17 @@ class Collectible(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom=coordinates)
         self.givesPoints = givesPoints
 
+    def playerCollision(self):
+        global points
+        if self.rect.colliderect(player.rect):
+            points += self.givesPoints
+
+    def update(self):
+        self.playerCollision()
+        redrawElement(self.rect)
+        self.rect -= elementSpeed
 # Creation of player and enemy instances
 player = Player()
-
 monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (-100, 400), 100)
 monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (-100, 500), 80)
 monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100, 200), 70)
@@ -190,7 +199,7 @@ def respawnElement(element):
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
-points = 0
+points = 98000
 
 rocket_surf = pygame.image.load('images/rocket.png').convert_alpha()
 rocket_rect = rocket_surf.get_rect(midright = (2000, 150))
@@ -214,14 +223,14 @@ def displayMainMenu():
     screen.blit(font100.render('SPACE DEFENDERS', False, 'White'), (50, 110))
     screen.blit(font75.render('Press P to start playing, A to shoot and SPACE to jump.', False, 'White'), (50, 170))
     screen.blit(font100.render('Stay near/Collect: ', False, 'White'), (50, 280))
-    screen.blit(pygame.transform.scale(spaceshipcollect_surf, (170, 100)), (640, 250))
+    screen.blit(pygame.transform.scale(spaceship.image, (170, 100)), (640, 250))
     screen.blit(rocket_surf, (800, 230))
     screen.blit(font100.render('Avoid: ', False, 'White'), (50, 420))
-    screen.blit(poison_surf, (250, 360))
+    screen.blit(poison.image, (250, 360))
     screen.blit(font100.render('Eliminate: ', False, 'White'), (50, 570))
-    screen.blit(pygame.transform.scale(monster1.image, (100, 100)), (400, 540))
-    screen.blit(pygame.transform.scale(monster2.image, (100, 100)), (550, 540))
-    screen.blit(pygame.transform.scale(monster3.image, (100, 100)), (700, 540))
+    screen.blit(pygame.transform.scale(monster1.image, (140, 100)), (380, 540))
+    screen.blit(pygame.transform.scale(monster2.image, (120, 100)), (550, 540))
+    screen.blit(pygame.transform.scale(monster3.image, (140, 100)), (700, 540))
 
 
 
@@ -290,12 +299,9 @@ while True:
 
     if game_active:
         updateTextColor()
-
         current_time = pygame.time.get_ticks()
-
         screen.fill('Black')
         screen.blit(ground, (0, 600))
-
         #RocketColision
         player.update()
         monster1.update()
@@ -315,18 +321,6 @@ while True:
             points = points + 1000
             rocket_rect.x = random.randint(1400,1600)
             rocket_rect.y = random.randint(0, 500)
-
-        #shooting collision (blast)
-        if points > 100000 and not in_spaceship:
-            if player.weaponRect.colliderect(monster1.rect):
-                respawnElement(monster1.rect)
-                addToPoints()
-            elif player.weaponRect.colliderect(monster2.rect):
-                respawnElement(monster2.rect)
-                addToPoints()
-            elif player.weaponRect.colliderect(monster3.rect):
-                respawnElement(monster3.rect)
-                addToPoints()
 
         #poison collision
         if player.rect.colliderect(poison_rect) and not in_spaceship:
