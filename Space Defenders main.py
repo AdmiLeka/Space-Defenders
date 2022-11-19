@@ -1,7 +1,5 @@
-#Space Defenders
-import time
+# Space Defenders
 import pygame
-from pygame import mixer
 import random
 from sys import exit
 
@@ -87,7 +85,7 @@ class Player(pygame.sprite.Sprite):
             self.missile1Rect.y = self.rect.y + 35
             self.missile2Rect.y = self.rect.y + 155
 
-    # Shooting the correct weapon based on conditions
+    # Shooting the correct weapon based on current player state
     def shoot(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -96,7 +94,6 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.shootGun()
 
-    # Calling all the above functions
     def update(self):
         self.transformPlayer()
         self.applyGravity()
@@ -107,6 +104,7 @@ class Player(pygame.sprite.Sprite):
         self.missile2Rect.x += self.weaponSpeed
 
 
+# Enemy class
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, image, coordinates, givesPoints):
         super().__init__()
@@ -114,10 +112,12 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midright=coordinates)
         self.givesPoints = givesPoints
 
+    # Respawn mechanism
     def respawnSelf(self):
         self.rect.x = random.randint(1450, 1800)
         self.rect.y = random.randint(0, 500)
 
+    # Collision mechanism for missiles
     def missileCollision(self):
         global points
         if in_spaceship:
@@ -125,6 +125,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.respawnSelf()
                 points += self.givesPoints
 
+    # Collision mechanism for player's main weapons
     def gunCollision(self):
         global points
         if player.weaponRect.colliderect(self.rect):
@@ -134,6 +135,7 @@ class Enemy(pygame.sprite.Sprite):
             if points < 100000:
                 player.weaponRect.x = 1500
 
+    # Collision mechanism for spaceship
     def spaceshipCollision(self):
         global points
         if in_spaceship and self.rect.colliderect(player.rect):
@@ -149,12 +151,14 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class Collectible(pygame.sprite.Sprite):
-    def __init__(self, image, coordinates, givesPoints):
+    def __init__(self, image, coordinates, givesPoints, speed=elementSpeed):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midbottom=coordinates)
         self.givesPoints = givesPoints
+        self.speed = speed
 
+    # Collision with player mechanism
     def playerCollision(self):
         global points
         if self.rect.colliderect(player.rect):
@@ -163,7 +167,9 @@ class Collectible(pygame.sprite.Sprite):
     def update(self):
         self.playerCollision()
         redrawElement(self.rect)
-        self.rect -= elementSpeed
+        self.rect -= self.speed
+
+
 # Creation of player and enemy instances
 player = Player()
 monster1 = Enemy(pygame.image.load('images/monster1.png').convert_alpha(), (-100, 400), 100)
@@ -171,6 +177,7 @@ monster2 = Enemy(pygame.image.load('images/monster2.png').convert_alpha(), (-100
 monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100, 200), 70)
 spaceship = Collectible(pygame.image.load('images/spaceshipcollect.png').convert_alpha(), (-200, 800), 500)
 poison = Collectible(pygame.image.load('images/poison.png').convert_alpha(), (1700, 300), -1000)
+heart = Collectible(pygame.image.load('images/heart.png').convert_alpha(), (1700, 300), 50)
 
 
 # Font initialization
@@ -179,12 +186,13 @@ font75 = pygame.font.Font('font/Pixeltype.ttf', 75)
 font40 = pygame.font.Font('font/Pixeltype.ttf', 40)
 
 #heart
-heart_surf = pygame.image.load('images/heart.png').convert_alpha()
-heart_rect = heart_surf.get_rect(center = (150, 550))
+heart_rect = heart.image.get_rect(center=(150, 550))
 collectible_heart_surf = pygame.image.load('images/heart.png').convert_alpha()
 collectible_heart_rect = collectible_heart_surf.get_rect(center = (150, 550))
 lives = 5
 
+
+# Making an element reappear if outside screen bounds
 def redrawElement(element):
     if element.x <= -150:
         element.x = random.randint(1400, 1850)
@@ -233,12 +241,7 @@ def displayMainMenu():
     screen.blit(pygame.transform.scale(monster3.image, (140, 100)), (700, 540))
 
 
-
-#Managing the score
-def addToPoints():
-    global points
-    points += 100
-
+# Updating text color based on points
 def updateTextColor():
     global text_color, points
     if points > 0:
@@ -253,22 +256,11 @@ def showHearts():
     x = 40
     y = 40
     for i in range(0, lives):
-        screen.blit(heart_surf, (x, y))
+        screen.blit(heart.image, (x, y))
         x += 50
-
-def collectHearts():
-    global lives
-    if collectible_heart_rect.x <= -100:
-        collectible_heart_rect.x = 5000
-    if player.rect.colliderect(collectible_heart_rect) and lives < 5:
-        lives += 1
-
-    collectible_heart_rect.x -= elementSpeed
 
 def dotheHearts():
     showHearts()
-    collectHearts()
-
 
 while True:
     if uptrend == True:
@@ -302,7 +294,6 @@ while True:
         current_time = pygame.time.get_ticks()
         screen.fill('Black')
         screen.blit(ground, (0, 600))
-        #RocketColision
         player.update()
         monster1.update()
         monster2.update()
