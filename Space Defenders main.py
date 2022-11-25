@@ -206,11 +206,10 @@ def respawnElement(element):
     element.x = random.randint(1450, 1900)
     element.y = random.randint(0, 500)
 
-#avoid
 poison_surf = pygame.image.load('images/poison.png').convert_alpha()
 poison_rect = poison_surf.get_rect(center = (1400, random.randint(0, 500)))
 #collect
-points = 98000
+points = 0
 
 rocket_surf = pygame.image.load('images/rocket.png').convert_alpha()
 rocket_rect = rocket_surf.get_rect(midright = (2000, 150))
