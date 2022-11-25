@@ -6,7 +6,7 @@ A space shooter game
 A 2D game made in Python. The goal of this game is to shoot enemies and stay near the booster rockets.
 The player should also aim to avoid the alien toxic waste, as not to lose points.
 
-![Space Defenders image2](https://user-images.githubusercontent.com/95366089/184305363-f649d068-7a63-4620-b446-017b487ca35d.png)
+![Untitled](https://user-images.githubusercontent.com/95366089/204060387-5a41bffa-9475-48a5-83d7-998807e7bb1a.png)
 
 
 Collecting the small spaceship gives you great speed for 5 seconds and allows you to have much greater speed
