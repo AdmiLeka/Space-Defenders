@@ -1,6 +1,7 @@
 # Space Defenders
 import pygame
 import random
+from background import BG
 from sys import exit
 
 game_active = False
@@ -178,7 +179,9 @@ monster3 = Enemy(pygame.image.load('images/monster3.png').convert_alpha(), (-100
 spaceship = Collectible(pygame.image.load('images/spaceshipcollect.png').convert_alpha(), (-200, 800), 500)
 poison = Collectible(pygame.image.load('images/poison.png').convert_alpha(), (1700, 300), -1000)
 heart = Collectible(pygame.image.load('images/heart.png').convert_alpha(), (1700, 300), 50)
-
+backgroundz = BG()
+bg_group = pygame.sprite.Group()
+bg_group.add(backgroundz)
 
 # Font initialization
 font100 = pygame.font.Font('font/Pixeltype.ttf', 100)
@@ -292,7 +295,9 @@ while True:
     if game_active:
         updateTextColor()
         current_time = pygame.time.get_ticks()
-        screen.fill('Black')
+        bg_group.update()
+        screen.fill("Black")
+        bg_group.draw(screen)
         screen.blit(ground, (0, 600))
         player.update()
         monster1.update()
