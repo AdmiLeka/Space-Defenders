@@ -12,10 +12,9 @@ The player should also aim to avoid the alien toxic waste, as not to lose points
 Collecting the small spaceship gives you great speed for 5 seconds and allows you to have much greater speed
 and access to the ship's rockets.
 
-![Space Defenders image3](https://user-images.githubusercontent.com/95366089/184305761-00f9f506-8a30-4a9f-a852-c23d1cdf7cc9.png)
-
+![gg](https://user-images.githubusercontent.com/95366089/204060562-ae187c9b-67d6-458a-ac06-b8aa4c96a2da.png)
 
 Reaching 100,000 points and higher transforms your soldier into a super soldier with a super weapon that
 passes through the enemies and destroys everything in its path!
 
-![Space Defenders image4](https://user-images.githubusercontent.com/95366089/184306049-0fb894e6-3c9a-4ba6-a7c2-67ff2e13556d.png)
+![hehe](https://user-images.githubusercontent.com/95366089/204060661-9e3aeb35-906f-408f-811e-75b09407874d.png)
