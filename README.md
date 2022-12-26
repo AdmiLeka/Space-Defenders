@@ -1,5 +1,27 @@
 # Space-Defenders
-A space shooter game
+
+## Resources used
+* Pygame
+
+## Installation
+
+* **Clone the repository**
+
+```
+https://github.com/AdmiLeka/Space-Defenders.git
+```
+
+## Install the dependencies
+```bash
+pip install -r requirements.txt
+```
+
+## Run the game
+```bash
+python main.py
+```
+
+## Screenshots and description of the game
 
 ![Space Defenders image1](https://user-images.githubusercontent.com/95366089/184304787-ea3fee71-f409-4294-8601-0fdbd201cbba.png)
 
